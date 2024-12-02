@@ -63,7 +63,9 @@ Fail with a message if adaptSecurityContext has any value other than "force" or 
 Fail with a message if Identity is disabled and identityKeycloak is enabled.
 */}}
 {{- if and (not .Values.identity.enabled) .Values.identityKeycloak.enabled }}
-  {{- $errorMessage := "[camunda][error] Identity is disabled but identityKeycloak is enabled. Please ensure that if identityKeycloak is enabled, Identity must also be enabled."
+  {{- $errorMessage := printf "[camunda][error] %s %s"
+      "Identity is disabled but identityKeycloak is enabled."
+      "Please ensure that if identityKeycloak is enabled, Identity must also be enabled."
   -}}
   {{ printf "\n%s" $errorMessage | trimSuffix "\n"| fail }}
 {{- end }}
@@ -72,7 +74,9 @@ Fail with a message if Identity is disabled and identityKeycloak is enabled.
 [opensearch] when existingSecret is provided for opensearch then password field should be empty
 */}}
 {{- if and .Values.global.opensearch.auth.existingSecret .Values.global.opensearch.auth.password }}
-  {{- $errorMessage := "[camunda][error] global.opensearch.auth.existingSecret and global.opensearch.auth.password cannot both be set." -}}
+  {{- $errorMessage := printf "[camunda][error] %s"
+      " global.opensearch.auth.existingSecret and global.opensearch.auth.password cannot both be set."
+  -}}
   {{ printf "\n%s" $errorMessage | trimSuffix "\n"| fail }}
 {{- end }}
 
@@ -82,40 +86,64 @@ Fail with a message if Identity is disabled and identityKeycloak is enabled.
 
     {{- $existingSecretsNotConfigured := list }}
 
-    {{ if and (.Values.global.identity.auth.enabled) (.Values.connectors.enabled) (not .Values.global.identity.auth.connectors.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "global.identity.auth.connectors.existingSecret.name" }}
+    {{ if .Values.global.identity.auth.enabled }}
+      {{ if and (.Values.connectors.enabled)
+                (not .Values.global.identity.auth.connectors.existingSecret) }}
+        {{- $existingSecretsNotConfigured = append
+            $existingSecretsNotConfigured "global.identity.auth.connectors.existingSecret.name" }}
+      {{- end }}
+
+      {{ if and (ne (upper .Values.global.identity.auth.type) "KEYCLOAK")
+                (.Values.identity.enabled) (not  .Values.global.identity.auth.identity.existingSecret) }}
+        {{- $existingSecretsNotConfigured = append
+            $existingSecretsNotConfigured "global.identity.auth.identity.existingSecret.name" }}
+      {{- end }}
+
+      {{ if and (.Values.console.enabled)
+            (not .Values.global.identity.auth.console.existingSecret) }}
+        {{- $existingSecretsNotConfigured = append
+            $existingSecretsNotConfigured "global.identity.auth.console.existingSecret.name" }}
+      {{- end }}
+
+      {{ if and (.Values.core.enabled)
+                (not .Values.global.identity.auth.core.existingSecret) }}
+        {{- $existingSecretsNotConfigured = append
+            $existingSecretsNotConfigured "global.identity.auth.core.existingSecret.name" }}
+      {{- end }}
     {{- end }}
 
-    {{ if and (.Values.global.identity.auth.enabled) (ne (upper .Values.global.identity.auth.type) "KEYCLOAK") (.Values.identity.enabled) (not  .Values.global.identity.auth.identity.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "global.identity.auth.identity.existingSecret.name" }}
+    {{ if and (.Values.identityKeycloak.enabled)
+              (not .Values.identityKeycloak.auth.existingSecret) }}
+      {{- $existingSecretsNotConfigured = append
+          $existingSecretsNotConfigured "identityKeycloak.auth.existingSecret"
+      }}
     {{- end }}
 
-    {{ if and (.Values.global.identity.auth.enabled) (.Values.console.enabled) (not .Values.global.identity.auth.console.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "global.identity.auth.console.existingSecret.name" }}
+    {{ if and (.Values.identityKeycloak.postgresql.enabled)
+              (not .Values.identityKeycloak.postgresql.auth.existingSecret) }}
+      {{- $existingSecretsNotConfigured = append
+          $existingSecretsNotConfigured "identityKeycloak.postgresql.auth.existingSecret"
+      }}
     {{- end }}
 
-    {{ if and (.Values.global.identity.auth.enabled) (.Values.core.enabled) (not .Values.global.identity.auth.core.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "global.identity.auth.core.existingSecret.name" }}
+    {{ if and (.Values.postgresql.enabled)
+              (not .Values.postgresql.auth.existingSecret) }}
+      {{- $existingSecretsNotConfigured = append
+          $existingSecretsNotConfigured "postgresql.auth.existingSecret"
+      }}
     {{- end }}
 
-    {{ if and (.Values.identityKeycloak.enabled) (not .Values.identityKeycloak.auth.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "identityKeycloak.auth.existingSecret" }}
-    {{- end }}
-
-    {{ if and (.Values.identityKeycloak.postgresql.enabled) (not .Values.identityKeycloak.postgresql.auth.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "identityKeycloak.postgresql.auth.existingSecret" }}
-    {{- end }}
-
-    {{ if and (.Values.postgresql.enabled) (not .Values.postgresql.auth.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "postgresql.auth.existingSecret" }}
-    {{- end }}
-
-    {{ if and (.Values.identityPostgresql.enabled) (not .Values.identityPostgresql.auth.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "identityPostgresql.auth.existingSecret" }}
+    {{ if and (.Values.identityPostgresql.enabled)
+              (not .Values.identityPostgresql.auth.existingSecret) }}
+      {{- $existingSecretsNotConfigured = append
+          $existingSecretsNotConfigured "identityPostgresql.auth.existingSecret"
+      }}
     {{- end }}
 
     {{ if and (.Values.webModeler.enabled) (not .Values.webModeler.restapi.mail.existingSecret) }}
-      {{- $existingSecretsNotConfigured = append $existingSecretsNotConfigured "webModeler.restapi.mail.existingSecret.name" }}
+      {{- $existingSecretsNotConfigured = append
+          $existingSecretsNotConfigured "webModeler.restapi.mail.existingSecret.name"
+      }}
     {{- end }}
 
     {{- if $existingSecretsNotConfigured }}
@@ -127,27 +155,6 @@ DEPRECATION NOTICE: Starting from appVersion 8.7, the Camunda Helm chart will no
 Users must provide passwords as Kubernetes secrets. 
 In appVersion 8.6, this warning will appear if all necessary existingSecrets are not set.
 
-Example of a required secret:
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: identity-secret-for-components
-type: Opaque
-data:
-  # Identity apps auth.
-  connectors-secret: <base64-encoded-secret>
-  console-secret: <base64-encoded-secret>
-  optimize-secret: <base64-encoded-secret>
-  core-secret: <base64-encoded-secret>
-  # Identity Keycloak.
-  admin-password: <base64-encoded-secret>.
-  # Identity Keycloak PostgreSQL.
-  postgres-password: <base64-encoded-secret> # used for postgresql admin password
-  password: <base64-encoded-secret> # used for postgresql user password
-  # Web Modeler.
-  smtp-password: <base64-encoded-secret> # used for web modeler mail
-
 The following values inside your values.yaml need to be set but were not:
       `
           )
@@ -155,7 +162,7 @@ The following values inside your values.yaml need to be set but were not:
         {{- range $existingSecretsNotConfigured }}
           {{- $errorMessage = (cat "  " $errorMessage "\n" .) }}
         {{- end }}
-        {{- $errorMessage = (cat $errorMessage "\n\n" "Please be aware that each of the above parameters expect a string name of a kubernetes Secret.\n") }}
+        {{- $errorMessage = (cat $errorMessage "\n\n" "Please be aware that each of the above parameters expect a string name of a Kubernetes Secret object.\n") }}
         {{- printf "\n%s" $errorMessage | trimSuffix "\n" }}
       {{- else if eq .Values.global.testDeprecationFlags.existingSecretsMustBeSet "error" }}
         {{- $errorMessage := (printf "%s"
@@ -163,27 +170,6 @@ The following values inside your values.yaml need to be set but were not:
 [camunda][error]
 DEPRECATION NOTICE: Starting from appVersion 8.7, the Camunda Helm chart will no longer automatically generate passwords for the Identity component.
 Users must provide passwords as Kubernetes secrets. 
-
-Example of a required secret:
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: identity-secret-for-components
-type: Opaque
-data:
-  # Identity apps auth.
-  connectors-secret: <base64-encoded-secret>
-  console-secret: <base64-encoded-secret>
-  optimize-secret: <base64-encoded-secret>
-  core-secret: <base64-encoded-secret>
-  # Identity Keycloak.
-  admin-password: <base64-encoded-secret>.
-  # Identity Keycloak PostgreSQL.
-  postgres-password: <base64-encoded-secret> # used for postgresql admin password
-  password: <base64-encoded-secret> # used for postgresql user password
-  # Web Modeler.
-  smtp-password: <base64-encoded-secret> # used for web modeler mail
 
 The following values inside your values.yaml need to be set but were not:
       `
@@ -253,7 +239,7 @@ Usage:
 {{/*
 *******************************************************************************
 Camunda 8.7 cycle deprecated keys.
-
+*******************************************************************************
 Fail with a message when old values syntax is used.
 Chart Version: 12.0.0
 *******************************************************************************
