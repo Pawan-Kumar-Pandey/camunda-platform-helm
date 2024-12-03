@@ -126,8 +126,8 @@ Fail with a message if Identity is disabled and identityKeycloak is enabled.
       }}
     {{- end }}
 
-    {{ if and (.Values.postgresql.enabled)
-              (not .Values.postgresql.auth.existingSecret) }}
+    {{ if and (.Values.webModelerPostgresql.enabled)
+              (not .Values.webModelerPostgresql.auth.existingSecret) }}
       {{- $existingSecretsNotConfigured = append
           $existingSecretsNotConfigured "postgresql.auth.existingSecret"
       }}
@@ -218,7 +218,7 @@ Usage:
 camundaPlatform.keyRemoved
 Fail with message when the old values file key is used.
 Usage:
-{{ include "camundaPlatform.keyRenamed" (dict
+{{ include "camundaPlatform.keyRemoved" (dict
   "condition" (.Values.identity.keycloak)
   "oldName" "identity.keycloak"
 ) }}

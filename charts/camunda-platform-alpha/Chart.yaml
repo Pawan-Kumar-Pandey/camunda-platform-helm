@@ -32,7 +32,7 @@ dependencies:
     condition: "identityPostgresql.enabled"
   # WebModeler Dependencies.
   - name: web-modeler-postgresql
-    alias: postgresql
+    alias: webModelerPostgresql
     repository: "file://../web-modeler-postgresql-15"
     version: 15.x.x
     condition: "webModelerPostgresql.enabled"
