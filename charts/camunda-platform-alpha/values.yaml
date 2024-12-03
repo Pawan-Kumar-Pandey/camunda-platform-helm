@@ -267,7 +267,7 @@ global:
         enabled: false
         ## @param global.identity.auth.admin.clientId defines the client id.
         clientId: admin
-        ## @param global.identity.auth.admin.existingSecret can be used to use an own existing secret. If not set a random secret is generated.
+        ## @param global.identity.auth.admin.existingSecret.name can be used to use an own existing secret. If not set a random secret is generated.
         existingSecret:
           name: camunda-credentials
         ## @param global.identity.auth.admin.existingSecretKey defines the key within the existing secret object.
@@ -305,7 +305,7 @@ global:
         audience: console-api
         ## @param global.identity.auth.console.wellKnown defines the uri for the well known config which is used by Console (optional).
         wellKnown: https://well-known-uri
-        ## @param global.identity.auth.console.existingSecret can be used to use an own existing secret. If not set a random secret is generated.
+        ## @param global.identity.auth.console.existingSecret.name can be used to use an own existing secret. If not set a random secret is generated.
         existingSecret:
           name: camunda-credentials
         ## @param global.identity.auth.console.existingSecretKey defines the key within the existing secret object.
@@ -336,7 +336,7 @@ global:
       connectors:
         ## @param global.identity.auth.connectors.clientId defines the client id, which is used by Connectors in authentication flows.
         clientId: connectors
-        ## @param global.identity.auth.connectors.existingSecret can be used to use an own existing secret. If not set a random secret is generated.
+        ## @param global.identity.auth.connectors.existingSecret.name can be used to use an own existing secret. If not set a random secret is generated.
         existingSecret:
           name: camunda-credentials
         ## @param global.identity.auth.connectors.existingSecretKey defines the key within the existing secret object.
@@ -348,7 +348,7 @@ global:
         audience: core-api
         ## @param global.identity.auth.core.clientId defines the client id, which is used by Core in authentication flows.
         clientId: core
-        ## @param global.identity.auth.core.existingSecret can be used to use an own existing secret. If not set a random secret is generated.
+        ## @param global.identity.auth.core.existingSecret.name can be used to use an own existing secret. If not set a random secret is generated.
         existingSecret:
           name: camunda-credentials
         ## @param global.identity.auth.core.existingSecretKey defines the key within the existing secret object.
@@ -366,7 +366,7 @@ global:
         audience: optimize-api
         ## @param global.identity.auth.optimize.clientId defines the client id, which is used by Optimize in authentication flows.
         clientId: optimize
-        ## @param global.identity.auth.optimize.existingSecret can be used to use an own existing secret. If not set a random secret is generated.
+        ## @param global.identity.auth.optimize.existingSecret.name can be used to use an own existing secret. If not set a random secret is generated.
         existingSecret:
           name: camunda-credentials
         ## @param global.identity.auth.optimize.existingSecretKey defines the key within the existing secret object.
@@ -1694,8 +1694,8 @@ webModeler:
 #       ####   ####    #    ####  #    # ######  ####   ### # ######
 ## @section WebModeler - PostgreSQL Parameters
 ## @extra postgresql configuration for the postgresql dependency chart used by WebModeler. See the chart documentation https://github.com/bitnami/charts/tree/master/bitnami/postgresql#parameters for more details.
-postgresql:
-  ## @param postgresql.enabled if true, a PostgreSQL database will be deployed as part of the Helm release by using the dependency chart
+webModelerPostgresql:
+  ## @param webModelerPostgresql.enabled if true, a PostgreSQL database will be deployed as part of the Helm release by using the dependency chart
   # Note: If WebModeler is enabled, and WebModeler Postgresql is disabled, the external database configuration must be set under "webModeler.restapi.externalDatabase".
   enabled: false
   ## @extra postgresql.global.compatibility Compatibility adaptations for Kubernetes platforms
@@ -1706,42 +1706,42 @@ postgresql:
       ## Compatibility adaptations for Openshift
       ##
       openshift:
-        ## @param postgresql.global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: force (perform the adaptation always), disabled (do not perform adaptation)
+        ## @param webModelerPostgresql.global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: force (perform the adaptation always), disabled (do not perform adaptation)
         ##
         adaptSecurityContext: "{{ .Values.global.compatibility.openshift.adaptSecurityContext | default \"disabled\" }}"
-  ## @param postgresql.nameOverride defines the name of the Postgres resources (names will be prefixed with the release name), see https://github.com/bitnami/charts/tree/main/bitnami/postgresql#common-parameters
+  ## @param webModelerPostgresql.nameOverride defines the name of the Postgres resources (names will be prefixed with the release name), see https://github.com/bitnami/charts/tree/main/bitnami/postgresql#common-parameters
   # Note: Don't use "postgresql" which is already used for Keycloak's database.
   nameOverride: postgresql-web-modeler
   # https://hub.docker.com/r/bitnami/postgresql/tags
-  ## @param postgresql.image.repository PostgreSQL repo
-  ## @param postgresql.image.tag PostgreSQL image tag
+  ## @param webModelerPostgresql.image.repository PostgreSQL repo
+  ## @param webModelerPostgresql.image.tag PostgreSQL image tag
   image:
     repository: bitnami/postgresql
     tag: 14.15.0-debian-12-r2
   ## @extra postgresql.auth configuration of the database authentication
   auth:
-    ## @param postgresql.auth.username defines the name of the database user to be created for WebModeler
+    ## @param webModelerPostgresql.auth.username defines the name of the database user to be created for WebModeler
     username: web-modeler
-    ## @param postgresql.auth.password can be used to provide the database user's password; a random password will be generated if left empty / ignored if `postgresql.auth.existingSecret` is set
+    ## @param webModelerPostgresql.auth.password can be used to provide the database user's password; a random password will be generated if left empty / ignored if `postgresql.auth.existingSecret` is set
     password: ""
-    ## @param postgresql.auth.database defines the name of the database to be created for WebModeler
+    ## @param webModelerPostgresql.auth.database defines the name of the database to be created for WebModeler
     database: web-modeler
-    ## @param postgresql.auth.existingSecret can be used to provide the name of an existing secret resource containing the database password
+    ## @param webModelerPostgresql.auth.existingSecret can be used to provide the name of an existing secret resource containing the database password
     existingSecret: ""
     secretKeys:
-      ## @param postgresql.auth.secretKeys.adminPasswordKey defines the key within the existing secret object for PostgreSQL admin.
+      ## @param webModelerPostgresql.auth.secretKeys.adminPasswordKey defines the key within the existing secret object for PostgreSQL admin.
       adminPasswordKey: "postgres-password"
-      ## @param postgresql.auth.secretKeys.userPasswordKey defines the key within the existing secret object for PostgreSQL user.
+      ## @param webModelerPostgresql.auth.secretKeys.userPasswordKey defines the key within the existing secret object for PostgreSQL user.
       userPasswordKey: "password"
 
-  ## @param postgresql.primary.containerSecurityContext.enabled
-  ## @param postgresql.primary.containerSecurityContext.allowPrivilegeEscalation
-  ## @param postgresql.primary.containerSecurityContext.privileged
-  ## @param postgresql.primary.containerSecurityContext.readOnlyRootFilesystem
-  ## @param postgresql.primary.containerSecurityContext.runAsNonRoot
-  ## @param postgresql.primary.containerSecurityContext.runAsUser
-  ## @param postgresql.primary.containerSecurityContext.capabilities.drop
-  ## @param postgresql.primary.containerSecurityContext.seccompProfile.type
+  ## @param webModelerPostgresql.primary.containerSecurityContext.enabled
+  ## @param webModelerPostgresql.primary.containerSecurityContext.allowPrivilegeEscalation
+  ## @param webModelerPostgresql.primary.containerSecurityContext.privileged
+  ## @param webModelerPostgresql.primary.containerSecurityContext.readOnlyRootFilesystem
+  ## @param webModelerPostgresql.primary.containerSecurityContext.runAsNonRoot
+  ## @param webModelerPostgresql.primary.containerSecurityContext.runAsUser
+  ## @param webModelerPostgresql.primary.containerSecurityContext.capabilities.drop
+  ## @param webModelerPostgresql.primary.containerSecurityContext.seccompProfile.type
   primary:
     containerSecurityContext:
       enabled: true
@@ -1754,9 +1754,9 @@ postgresql:
         drop: ["ALL"]
       seccompProfile:
         type: RuntimeDefault
-    ## @param postgresql.primary.podSecurityContext.enabled
-    ## @param postgresql.primary.podSecurityContext.runAsNonRoot
-    ## @param postgresql.primary.podSecurityContext.fsGroup
+    ## @param webModelerPostgresql.primary.podSecurityContext.enabled
+    ## @param webModelerPostgresql.primary.podSecurityContext.runAsNonRoot
+    ## @param webModelerPostgresql.primary.podSecurityContext.fsGroup
     podSecurityContext:
       enabled: true
       runAsNonRoot: true
