@@ -1,8 +1,6 @@
 global:
   identity:
     auth:
-      # Disable the Identity authentication for local development
-      # it will fall back to basic-auth: demo/demo as default user
       enabled: false
 
 # Disable identity as part of the Camunda core
@@ -16,25 +14,63 @@ identityKeycloak:
 optimize:
   enabled: false
 
-# Reduce for Zeebe and Gateway the configured replicas and with that the required resources
-# to get it running locally
+# Zeebe configuration
 zeebe:
   clusterSize: 1
   partitionCount: 1
   replicationFactor: 1
-  pvcSize: 10Gi
+  pvcSize: 20Gi
+  env:
+    - name: ZEEBE_BROKER_CLUSTER_INITIALCONTACTPOINTS
+      value: camunda-zeebe-0.camunda-zeebe.default.svc.cluster.local:26502
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1"
 
 zeebeGateway:
   replicas: 1
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 9600
+    initialDelaySeconds: 60
+    timeoutSeconds: 5
+    periodSeconds: 30
+    failureThreshold: 5
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
 
 connectors:
-  enabled: true
-  inbound:
-    mode: disabled
+  enabled: false
 
 elasticsearch:
   master:
     replicaCount: 1
-    # Request smaller persistent volumes.
     persistence:
       size: 15Gi
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
+
+postgresql:
+  enabled: true
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
